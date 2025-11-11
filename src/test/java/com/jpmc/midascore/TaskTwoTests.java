@@ -8,9 +8,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 
-@SpringBootTest
+import com.jpmc.midascore.component.KafkaProducer;
+
+@SpringBootTest(properties = {
+    "spring.kafka.bootstrap-servers=${spring.embedded.kafka.brokers}",
+    "spring.kafka.consumer.bootstrap-servers=${spring.embedded.kafka.brokers}",
+    "spring.kafka.producer.bootstrap-servers=${spring.embedded.kafka.brokers}",
+    "spring.kafka.producer.value-serializer=org.springframework.kafka.support.serializer.JsonSerializer",
+    "spring.kafka.consumer.value-deserializer=org.springframework.kafka.support.serializer.JsonDeserializer",
+    "spring.kafka.consumer.properties.spring.json.trusted.packages=com.jpmc.midascore.foundation"
+})
 @DirtiesContext
-@EmbeddedKafka(partitions = 1, brokerProperties = {"listeners=PLAINTEXT://localhost:9092", "port=9092"})
+@EmbeddedKafka(partitions = 1, topics = "transactions")
 class TaskTwoTests {
     static final Logger logger = LoggerFactory.getLogger(TaskTwoTests.class);
 
@@ -20,7 +29,7 @@ class TaskTwoTests {
     @Autowired
     private FileLoader fileLoader;
 
-    @Test
+     @Test
     void task_two_verifier() throws InterruptedException {
         String[] transactionLines = fileLoader.loadStrings("/test_data/poiuytrewq.uiop");
         for (String transactionLine : transactionLines) {
